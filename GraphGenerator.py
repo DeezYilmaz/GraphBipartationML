@@ -37,12 +37,16 @@ Graph_list=[]
 """
     Count the amount of true and false partitions and include in the data
 """
-for i in range(10):
-    G=gnp_random_connected_graph(random.randint(5,5)*2,random.uniform(0.01,0.02))
-    Partition=community.kernighan_lin_bisection(G,max_iter=50)
-    Gs1=nx.subgraph(G,Partition[0])
-    Gs2=nx.subgraph(G,Partition[1])
-    label_list.append(nx.is_connected(Gs1) and nx.is_connected(Gs2) and len(Gs1.nodes())==len(Gs2.nodes()))
+for i in range(100):
+    G=gnp_random_connected_graph(random.randint(25,50)*2,random.uniform(0.01,0.02))
+    trueCount=0
+    for i in range(50):
+        Partition=community.kernighan_lin_bisection(G,max_iter=50)
+        Gs1=nx.subgraph(G,Partition[0])
+        Gs2=nx.subgraph(G,Partition[1])
+        if(nx.is_connected(Gs1) and nx.is_connected(Gs2) and len(Gs1.nodes())==len(Gs2.nodes())):
+            trueCount+=1
+    label_list.append(trueCount)
     
     Graph_list.append(G)
 
