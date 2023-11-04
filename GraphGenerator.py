@@ -41,13 +41,12 @@ for i in range(100):
     G=gnp_random_connected_graph(random.randint(25,50)*2,random.uniform(0.01,0.02))
     trueCount=0
     for i in range(50):
-        Partition=community.kernighan_lin_bisection(G,max_iter=50)
+        Partition=community.kernighan_lin_bisection(G,max_iter=15)
         Gs1=nx.subgraph(G,Partition[0])
         Gs2=nx.subgraph(G,Partition[1])
         if(nx.is_connected(Gs1) and nx.is_connected(Gs2) and len(Gs1.nodes())==len(Gs2.nodes())):
             trueCount+=1
     label_list.append(trueCount)
-    
     Graph_list.append(G)
 
 graph_data= {
@@ -58,7 +57,13 @@ graphDataFrame= pd.DataFrame(graph_data)
 
 pickle.dump(graphDataFrame,open('GraphData.csv','wb'))
 
-print(graphDataFrame)
+#print(graphDataFrame)
+
+
+
+"""
+    Eski plot kodu
+"""
 # iterable= max(nx.connected_components(G), key=len)
 # Gs=nx.subgraph(G,iterable)
 
