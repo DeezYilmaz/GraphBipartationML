@@ -5,34 +5,68 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle
+import karateclub.graph_embedding.graph2vec as Graph2Vec
 
 from node2vec import Node2Vec
 
 Graph_df=pickle.load(open('GraphData.csv','rb'))
-Gs= Graph_df.iloc[7]['Graph']
 
-Graph=nx.erdos_renyi_graph(1000,0.04)
-# nx.draw(Graph)
-# plt.show()
-node2vec = Node2Vec(Graph, dimensions=2, walk_length=4, num_walks=10, workers=1)
+"""
+GRAPH2VEC
+"""
+gList=[]
+colorList=[]
+for i in range(40):
+    gList.append(nx.connected_caveman_graph(5,5))
+    colorList.append('red')
+for i in range(40):
+    gList.append(nx.erdos_renyi_graph(50,0.1))
+    colorList.append('blue')
 
-model = node2vec.fit(window=10, min_count=1, batch_words=4)
-node_embeddings = {str(node): model.wv[str(node)] for node in Graph.nodes()}
+
+Gmodel = Graph2Vec.Graph2Vec(dimensions=2,wl_iterations=10,min_count=30)
+Gmodel.fit(gList)
+G2VEmbedding= Gmodel.get_embedding()
 
 
-
-
-data = {"x":[], "y":[], "z":[], "label":[]}
-
-for i in node_embeddings:
-    data["x"].append(node_embeddings[i][0])
-    data["y"].append(node_embeddings[i][1])
+G2V_data = {"x":[], "y":[],  "label":[]}
+for i in range(len(gList)):
+    G2V_data["x"].append(G2VEmbedding[i][0])
+    G2V_data["y"].append(G2VEmbedding[i][1])
 
 fig=plt.figure(figsize=(10,8))
 plt.title('Scatter Plot', fontsize=20)
 plt.xlabel('x', fontsize=15)
 plt.ylabel('y', fontsize=15)
-plt.scatter(data["x"], data["y"],marker='o')
+plt.scatter(G2V_data["x"], G2V_data["y"],marker='o',color=colorList)
+
+plt.show()
+
+
+"""
+NODE2VEC
+"""
+
+Graph=nx.erdos_renyi_graph(100,0.01)
+
+node2vec = Node2Vec(Graph, dimensions=2, walk_length=100, num_walks=20, workers=1)
+model = node2vec.fit(window=10, min_count=1, batch_words=4)
+node_embeddings = {str(node): model.wv[str(node)] for node in Graph.nodes()}
+
+node2Vec_data = {"x":[], "y":[], "z":[], "label":[]}
+
+for i in node_embeddings:
+    node2Vec_data["x"].append(node_embeddings[i][0])
+    node2Vec_data["y"].append(node_embeddings[i][1])
+
+
+
+
+fig=plt.figure(figsize=(10,8))
+plt.title('Scatter Plot', fontsize=20)
+plt.xlabel('x', fontsize=15)
+plt.ylabel('y', fontsize=15)
+plt.scatter(node2Vec_data["x"], node2Vec_data["y"],marker='o', color='red')
 
 plt.show()
 # Partition=community.kernighan_lin_bisection(Gs,max_iter=50)
