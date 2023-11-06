@@ -36,10 +36,10 @@ Graph_list=[]
 
 
 
-for i in range(250):
-    G=gnp_random_connected_graph(random.randint(25,50)*2,random.uniform(0,0.005))
+for i in range(500):
+    G=gnp_random_connected_graph(random.randint(50,500)*2,random.uniform(0,0.001))
     trueCount=0
-    print("on graph: ",i)
+    print("on graph: ",i,end="\r")
     for i in range(50):
         Partition=community.kernighan_lin.kernighan_lin_bisection(G,max_iter=10)
         Gs1=nx.subgraph(G,Partition[0])
