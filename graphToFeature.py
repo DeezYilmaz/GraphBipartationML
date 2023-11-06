@@ -12,10 +12,11 @@ from node2vec import Node2Vec
 from sklearn.metrics import accuracy_score
 from sklearn.discriminant_analysis import StandardScaler
 
+from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 Graph_df=pickle.load(open('GraphData.pickle','rb'))
-
 
 
 """
@@ -24,27 +25,27 @@ GRAPH2VEC
 size=len(Graph_df['Graph'])
 colorList=['blue']*(size //2)+['red']*(size //2)
 
-Gmodel = Graph2Vec.Graph2Vec(dimensions=2,wl_iterations=2,min_count=5)
+Gmodel = Graph2Vec.Graph2Vec(dimensions=3,wl_iterations=2,min_count=5)
 Gmodel.fit(Graph_df['Graph'])
 G2VEmbedding= Gmodel.get_embedding()
 
 
-G2V_data = {"x":[], "y":[], "z":[], "label":[]}
-for i in range(len(Graph_df['Graph'])):
-    G2V_data["x"].append(G2VEmbedding[i][0])
-    G2V_data["y"].append(G2VEmbedding[i][1])
+# G2V_data = {"x":[], "y":[], "z":[], "label":[]}
+# for i in range(len(Graph_df['Graph'])):
+#     G2V_data["x"].append(G2VEmbedding[i][0])
+#     G2V_data["y"].append(G2VEmbedding[i][1])
     # G2V_data["z"].append(G2VEmbedding[i][2])
 
-plt.style.use("seaborn-v0_8")
-fig=plt.figure(figsize=(10,8))
+# plt.style.use("seaborn-v0_8")
+# fig=plt.figure(figsize=(10,8))
 # ax=plt.axes(projection ='3d')
 
-plt.title('Scatter Plot', fontsize=20)
-plt.xlabel('x', fontsize=15)
-plt.ylabel('y', fontsize=15)
-plt.scatter(G2V_data["x"], G2V_data["y"],marker='o',color=colorList)
+# plt.title('Scatter Plot', fontsize=20)
+# plt.xlabel('x', fontsize=15)
+# plt.ylabel('y', fontsize=15)
+# plt.scatter(G2V_data["x"], G2V_data["y"],marker='o',color=colorList)
 
-plt.show()
+# plt.show()
 
 knn = KNeighborsClassifier(n_neighbors=5)
 
@@ -60,6 +61,9 @@ y_pred = knn.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
 print("Accuracy:", accuracy)
 
+print(f1_score(y_test, y_pred, average=None))
+ConfusionMatrixDisplay.from_estimator(knn, X_test, y_test)
+plt.show()
 exit()
 """
 NODE2VEC

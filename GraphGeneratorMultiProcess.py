@@ -5,6 +5,7 @@ from networkx.algorithms import community
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle
+import multiprocessing 
 def gnp_random_connected_graph(n, p):
     """
     Generates a random undirected graph, similarly to an Erdős-Rényi
@@ -26,44 +27,61 @@ def gnp_random_connected_graph(n, p):
                 G.add_edge(*e)
     return G
 
+def GenerateGraphData(n):
+    label_list=[]
 
-
-fig = plt.subplots(1, figsize=(12,10))
-
-label_list=[]
-
-Graph_list=[]
-
-
-
-for i in range(500):
-    G=gnp_random_connected_graph(random.randint(50,1000)*2,random.uniform(0,0.001))
-    trueCount=0
-    print("on graph: ",i,end="\r")
-    for i in range(20):
-        Partition=community.kernighan_lin.kernighan_lin_bisection(G,max_iter=150)
-        Gs1=nx.subgraph(G,Partition[0])
-        Gs2=nx.subgraph(G,Partition[1])
-        if(nx.is_connected(Gs1) and nx.is_connected(Gs2) and len(Gs1.nodes())==len(Gs2.nodes())):
-            trueCount+=1
-    if(trueCount>0):
-        label_list=[True]+label_list
-        Graph_list=[G]+Graph_list
-    else:
-        label_list=label_list+[False]
-        Graph_list=Graph_list+[G]
+    Graph_list=[]
+    
+    for i in range(n):
+        G=gnp_random_connected_graph(random.randint(50,3000)*2,random.uniform(0,0.001))
+        trueCount=0
+        print("on graph: ",i,end="\r")
+        for i in range(15):
+            Partition=community.kernighan_lin.kernighan_lin_bisection(G,max_iter=25)
+            Gs1=nx.subgraph(G,Partition[0])
+            Gs2=nx.subgraph(G,Partition[1])
+            if(nx.is_connected(Gs1) and nx.is_connected(Gs2) and len(Gs1.nodes())==len(Gs2.nodes())):
+                trueCount+=1
+        if(trueCount>0):
+            label_list=[True]+label_list
+            Graph_list=[G]+Graph_list
+        else:
+            label_list=label_list+[False]
+            Graph_list=Graph_list+[G]
         
+    graph_data= {
+        "Graph": Graph_list,
+        "Labels":label_list
+    }
+
+    graphDataFrame=pd.DataFrame(graph_data)
+    
+    pickle.dump(graphDataFrame,open('GraphDataTest.pickle','wb'))
+
+if __name__== '__main__':
+
+    p=multiprocessing.Pool(8)
+    p.map(GenerateGraphData,[200]*8)
+
+    # midPointDf= pd.DataFrame(GraphData)
+    # Glist=[]
+    # LabelList=[]
 
 
-graph_data= {
-    "Graph": Graph_list,
-    "Labels":label_list
-}
-graphDataFrame= pd.DataFrame(graph_data)
-graphDataFrame.to_csv("Graphdata.csv")
-pickle.dump(graphDataFrame,open('GraphData.pickle','wb'))
+    # for GraphLists in midPointDf['Graph']:
+    #     Glist=Glist+GraphLists
+    
+    # for LabLists in midPointDf['Labels']:
+    #     LabelList=LabelList+LabLists
 
-print(graphDataFrame)
+    # finalData= {
+    #     "Graph": Glist,
+    #     "Labels":LabelList
+    # }
+    # graphDataFrame= pd.DataFrame(finalData)
+    # graphDataFrame.to_csv("GraphdataTest.csv")
+
+    
 
 """
     Eski plot kodu
