@@ -34,32 +34,36 @@ label_list=[]
 
 Graph_list=[]
 
-"""
-    Count the amount of true and false partitions and include in the data
-"""
-for i in range(100):
-    G=gnp_random_connected_graph(random.randint(25,50)*2,random.uniform(0.01,0.02))
+
+
+for i in range(250):
+    G=gnp_random_connected_graph(random.randint(25,50)*2,random.uniform(0,0.005))
     trueCount=0
+    print("on graph: ",i)
     for i in range(50):
-        Partition=community.kernighan_lin_bisection(G,max_iter=15)
+        Partition=community.kernighan_lin.kernighan_lin_bisection(G,max_iter=10)
         Gs1=nx.subgraph(G,Partition[0])
         Gs2=nx.subgraph(G,Partition[1])
         if(nx.is_connected(Gs1) and nx.is_connected(Gs2) and len(Gs1.nodes())==len(Gs2.nodes())):
             trueCount+=1
-    label_list.append(trueCount)
-    Graph_list.append(G)
+    if(trueCount>0):
+        label_list=[True]+label_list
+        Graph_list=[G]+Graph_list
+    else:
+        label_list=label_list+[False]
+        Graph_list=Graph_list+[G]
+        
+
 
 graph_data= {
     "Graph": Graph_list,
     "Labels":label_list
 }
 graphDataFrame= pd.DataFrame(graph_data)
+graphDataFrame.to_csv("Graphdata.csv")
+pickle.dump(graphDataFrame,open('GraphData.pickle','wb'))
 
-pickle.dump(graphDataFrame,open('GraphData.csv','wb'))
-
-#print(graphDataFrame)
-
-
+print(graphDataFrame)
 
 """
     Eski plot kodu
