@@ -1,3 +1,4 @@
+import os
 import networkx as nx
 # from itertools import combinations, groupby
 # import random
@@ -16,7 +17,13 @@ from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
-Graph_df=pickle.load(open('GraphData.pickle','rb'))
+
+
+script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
+rel_path = "GraphDatas/Graphdata.pickle"
+abs_file_path = os.path.join(script_dir, rel_path)
+
+Graph_df=pickle.load(open(abs_file_path,'rb'))
 
 
 """
@@ -25,11 +32,12 @@ GRAPH2VEC
 size=len(Graph_df['Graph'])
 colorList=['blue']*(size //2)+['red']*(size //2)
 
-Gmodel = Graph2Vec.Graph2Vec(dimensions=3,wl_iterations=2,min_count=5)
+
+Gmodel = Graph2Vec.Graph2Vec(dimensions=5)
 Gmodel.fit(Graph_df['Graph'])
 G2VEmbedding= Gmodel.get_embedding()
 
-
+print("Completed Graph2Vec")
 # G2V_data = {"x":[], "y":[], "z":[], "label":[]}
 # for i in range(len(Graph_df['Graph'])):
 #     G2V_data["x"].append(G2VEmbedding[i][0])
@@ -47,7 +55,7 @@ G2VEmbedding= Gmodel.get_embedding()
 
 # plt.show()
 
-knn = KNeighborsClassifier(n_neighbors=5)
+knn = KNeighborsClassifier(n_neighbors=25)
 
 
 X_train, X_test, y_train, y_test =train_test_split(G2VEmbedding,Graph_df['Labels'],test_size=0.2)
@@ -64,6 +72,10 @@ print("Accuracy:", accuracy)
 print(f1_score(y_test, y_pred, average=None))
 ConfusionMatrixDisplay.from_estimator(knn, X_test, y_test)
 plt.show()
+
+###################
+
+
 exit()
 """
 NODE2VEC

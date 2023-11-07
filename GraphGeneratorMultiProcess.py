@@ -1,3 +1,4 @@
+import os
 import networkx as nx
 from itertools import combinations, groupby
 import random
@@ -33,11 +34,11 @@ def GenerateGraphData(n):
     Graph_list=[]
     
     for i in range(n):
-        G=gnp_random_connected_graph(random.randint(50,3000)*2,random.uniform(0,0.001))
+        G=gnp_random_connected_graph(random.randint(50,2500)*2,random.uniform(0,0.001))
         trueCount=0
         print("on graph: ",i,end="\r")
-        for i in range(15):
-            Partition=community.kernighan_lin.kernighan_lin_bisection(G,max_iter=25)
+        for i in range(50):
+            Partition=community.kernighan_lin.kernighan_lin_bisection(G,max_iter=10)
             Gs1=nx.subgraph(G,Partition[0])
             Gs2=nx.subgraph(G,Partition[1])
             if(nx.is_connected(Gs1) and nx.is_connected(Gs2) and len(Gs1.nodes())==len(Gs2.nodes())):
@@ -54,33 +55,36 @@ def GenerateGraphData(n):
         "Labels":label_list
     }
 
-    graphDataFrame=pd.DataFrame(graph_data)
-    
-    pickle.dump(graphDataFrame,open('GraphDataTest.pickle','wb'))
+    return graph_data
 
 if __name__== '__main__':
 
-    p=multiprocessing.Pool(8)
-    p.map(GenerateGraphData,[200]*8)
-
-    # midPointDf= pd.DataFrame(GraphData)
-    # Glist=[]
-    # LabelList=[]
+    script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
+    rel_path = "GraphDatas/Graphdata.pickle"
+    abs_file_path = os.path.join(script_dir, rel_path)
 
 
-    # for GraphLists in midPointDf['Graph']:
-    #     Glist=Glist+GraphLists
+    p=multiprocessing.Pool(16)
+    GraphDataList=p.map(GenerateGraphData,[100]*16)
+
+    midPointDf= pd.DataFrame(GraphDataList)
+    Glist=[]
+    LabelList=[]
+
+
+    for GraphLists in midPointDf['Graph']:
+        Glist=Glist+GraphLists
     
-    # for LabLists in midPointDf['Labels']:
-    #     LabelList=LabelList+LabLists
+    for LabLists in midPointDf['Labels']:
+        LabelList=LabelList+LabLists
 
-    # finalData= {
-    #     "Graph": Glist,
-    #     "Labels":LabelList
-    # }
-    # graphDataFrame= pd.DataFrame(finalData)
-    # graphDataFrame.to_csv("GraphdataTest.csv")
-
+    finalData= {
+        "Graph": Glist,
+        "Labels":LabelList
+    }
+    graphDataFrame= pd.DataFrame(finalData)
+    # graphDataFrame.to_csv("Graphdata.csv")
+    pickle.dump(graphDataFrame,open(abs_file_path,"wb"))
     
 
 """
