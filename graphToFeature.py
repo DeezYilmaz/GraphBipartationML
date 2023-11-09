@@ -6,7 +6,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle
-import karateclub.graph_embedding.graph2vec as Graph2Vec
+import karateclub.graph_embedding.feathergraph as Feather
 from node2vec import Node2Vec
 
 
@@ -19,23 +19,30 @@ from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 
 
-script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-rel_path = "GraphDatas/Graphdata.pickle"
-abs_file_path = os.path.join(script_dir, rel_path)
 
-Graph_df=pickle.load(open(abs_file_path,'rb'))
+
+# rel_path = "GraphDatas/GraphdataEmbed.pickle"
+# abs_file_path = os.path.join(script_dir, rel_path)
+
+# G2VEmbedding=pickle.load(open(abs_file_path,'rb'))
 
 
 """
 GRAPH2VEC
 """
-size=len(Graph_df['Graph'])
-colorList=['blue']*(size //2)+['red']*(size //2)
+
+filename="Graphdata"
+script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
+rel_path = "GraphDatas/"+filename+"Embed.pickle"
+abs_file_path = os.path.join(script_dir, rel_path)
+
+G2VEmbedding=pickle.load(open(abs_file_path,'rb'))
 
 
-Gmodel = Graph2Vec.Graph2Vec(dimensions=5)
-Gmodel.fit(Graph_df['Graph'])
-G2VEmbedding= Gmodel.get_embedding()
+rel_path = "GraphDatas/"+filename+".pickle"
+abs_file_path = os.path.join(script_dir, rel_path)
+
+Graph_df=pickle.load(open(abs_file_path,'rb'))
 
 print("Completed Graph2Vec")
 # G2V_data = {"x":[], "y":[], "z":[], "label":[]}
@@ -73,8 +80,30 @@ print(f1_score(y_test, y_pred, average=None))
 ConfusionMatrixDisplay.from_estimator(knn, X_test, y_test)
 plt.show()
 
+exit()
 ###################
 
+rel_path = "GraphDatas/GraphdataSmall.pickle"
+abs_file_path = os.path.join(script_dir, rel_path)
+
+Graph_df=pickle.load(open(abs_file_path,'rb'))
+
+Gmodel = Graph2Vec.FeatherGraph()
+Gmodel.fit(Graph_df['Graph'])
+G2VEmbedding= Gmodel.get_embedding()
+
+
+
+X_test = scaler.transform(G2VEmbedding)
+
+
+y_pred = knn.predict(X_test)
+accuracy = accuracy_score(Graph_df['Labels'], y_pred)
+print("Accuracy:", accuracy)
+
+print(f1_score(Graph_df['Labels'], y_pred, average=None))
+ConfusionMatrixDisplay.from_estimator(knn, X_test, Graph_df['Labels'])
+plt.show()
 
 exit()
 """

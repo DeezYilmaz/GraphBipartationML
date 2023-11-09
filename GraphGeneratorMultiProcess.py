@@ -34,15 +34,16 @@ def GenerateGraphData(n):
     Graph_list=[]
     
     for i in range(n):
-        G=gnp_random_connected_graph(random.randint(50,2500)*2,random.uniform(0,0.001))
+        G=gnp_random_connected_graph(random.randint(5,2500)*2,random.uniform(0,0.0015))
         trueCount=0
         print("on graph: ",i,end="\r")
-        for i in range(50):
-            Partition=community.kernighan_lin.kernighan_lin_bisection(G,max_iter=10)
+        for i in range(1):
+            Partition=community.kernighan_lin.kernighan_lin_bisection(G,max_iter=2000)
             Gs1=nx.subgraph(G,Partition[0])
             Gs2=nx.subgraph(G,Partition[1])
             if(nx.is_connected(Gs1) and nx.is_connected(Gs2) and len(Gs1.nodes())==len(Gs2.nodes())):
                 trueCount+=1
+                break
         if(trueCount>0):
             label_list=[True]+label_list
             Graph_list=[G]+Graph_list
@@ -58,14 +59,14 @@ def GenerateGraphData(n):
     return graph_data
 
 if __name__== '__main__':
-
+    fileName="Graphdata"
     script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-    rel_path = "GraphDatas/Graphdata.pickle"
+    rel_path = "GraphDatas/"+fileName+".pickle"
     abs_file_path = os.path.join(script_dir, rel_path)
 
 
     p=multiprocessing.Pool(16)
-    GraphDataList=p.map(GenerateGraphData,[100]*16)
+    GraphDataList=p.map(GenerateGraphData,[150]*16)
 
     midPointDf= pd.DataFrame(GraphDataList)
     Glist=[]
@@ -83,7 +84,7 @@ if __name__== '__main__':
         "Labels":LabelList
     }
     graphDataFrame= pd.DataFrame(finalData)
-    # graphDataFrame.to_csv("Graphdata.csv")
+    graphDataFrame.to_csv(fileName+".csv")
     pickle.dump(graphDataFrame,open(abs_file_path,"wb"))
     
 
