@@ -1,3 +1,4 @@
+import math
 import networkx as nx
 from itertools import combinations, groupby
 import random
@@ -31,30 +32,72 @@ def gnp_random_connected_graph(n, p):
 fig = plt.subplots(1, figsize=(12,10))
 
 label_list=[]
-
 Graph_list=[]
 
+"""
+def generate_barabasi_albert_graph(num_nodes_range, m_range):
+    num_nodes=random.randint(*num_nodes_range)
+    m=random.randint(*m_range)*2
+    return nx.barabasi_albert_graph(num_nodes, m)
+
+# Example usage:
+num_instances = 100
+num_nodes = (50,150)
+m_parameter = (1,1)
+
+barabasi_albert_graphs = [generate_barabasi_albert_graph(num_nodes, m_parameter) for _ in range(num_instances)]
+trueCount=0
 
 
-for i in range(500):
-    G=gnp_random_connected_graph(random.randint(50,1000)*2,random.uniform(0,0.001))
-    trueCount=0
-    print("on graph: ",i,end="\r")
-    for i in range(20):
-        Partition=community.kernighan_lin.kernighan_lin_bisection(G,max_iter=150)
-        Gs1=nx.subgraph(G,Partition[0])
-        Gs2=nx.subgraph(G,Partition[1])
-        if(nx.is_connected(Gs1) and nx.is_connected(Gs2) and len(Gs1.nodes())==len(Gs2.nodes())):
-            trueCount+=1
-    if(trueCount>0):
-        label_list=[True]+label_list
-        Graph_list=[G]+Graph_list
-    else:
-        label_list=label_list+[False]
-        Graph_list=Graph_list+[G]
+for G in barabasi_albert_graphs:
+    Partition=community.kernighan_lin.kernighan_lin_bisection(G,max_iter=(int)(0.4*len(G.nodes())*math.log10(len(G.nodes()))))
+    Gs1=nx.subgraph(G,Partition[0])
+    Gs2=nx.subgraph(G,Partition[1])
+    if(nx.is_connected(Gs1) and nx.is_connected(Gs2) and len(Gs1.nodes()) <= (len(G.nodes())/2+len(G.nodes())*0.01) 
+        and len(Gs1.nodes()) >= (len(G.nodes())/2-len(G.nodes())*0.01)   ):
+        trueCount+=1
+
+print(trueCount)
+"""
+def viewGraph(G):
+    nx.draw_networkx(G)
+    plt.show()
+
+def getOptimalProb():
+    
+    edgeProbMin= 0
+    edgeProbMax=0.1
+    for rng in range(1,8):
+        percentage=0
+        iteration=150
+        while(percentage>55 or percentage<45):
+            trueCount=0
+            edgeProb= (edgeProbMin+edgeProbMax)/2
+            for i in range(iteration):
+                nodeCount=random.randint(150*rng,150*(rng+1))*2
+                G=gnp_random_connected_graph(nodeCount,edgeProb)
+                #print("on graph: ",i,end="\r")
+                
+                Partition=community.kernighan_lin.kernighan_lin_bisection(G,max_iter=int( (0.4*len(G.nodes())*math.log10(len(G.nodes())))) )
+                Gs1=nx.subgraph(G,Partition[0])
+                Gs2=nx.subgraph(G,Partition[1])
+                if(nx.is_connected(Gs1) and nx.is_connected(Gs2) and len(Gs1.nodes()) <= (len(G.nodes())/2+len(G.nodes())*0.01) 
+                        and len(Gs1.nodes()) >= (len(G.nodes())/2-len(G.nodes())*0.01)   ):
+                    trueCount+=1
+
+            percentage=(trueCount/iteration)*100
+            if(percentage>55):
+                edgeProbMax=edgeProb
+            if(percentage<45):
+                edgeProbMin=edgeProb
+        print(rng,"%i-%i" %(150*rng*2,150*(rng+1)*2) ,"%.5f" % edgeProbMin,"%.5f" % edgeProbMax, "%.2f" % percentage)
+        edgeProbMin=0
         
 
+getOptimalProb()
+    
 
+exit()
 graph_data= {
     "Graph": Graph_list,
     "Labels":label_list

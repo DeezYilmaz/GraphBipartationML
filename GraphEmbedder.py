@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import pickle
-import karateclub.graph_embedding.feathergraph as Feather
+import karateclub.graph_embedding.graph2vec as Graph2Vec
 from node2vec import Node2Vec
 
 
@@ -22,7 +22,7 @@ Graph_df=pickle.load(open(abs_file_path,'rb'))
 """
 GRAPH2VEC
 """
-Gmodel = Feather.FeatherGraph()
+Gmodel = Graph2Vec.Graph2Vec()
 Gmodel.fit(Graph_df['Graph'])
 G2VEmbedding= Gmodel.get_embedding()
 

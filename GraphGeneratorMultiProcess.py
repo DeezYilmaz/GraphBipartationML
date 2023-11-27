@@ -1,3 +1,4 @@
+import math
 import os
 import networkx as nx
 from itertools import combinations, groupby
@@ -29,27 +30,43 @@ def gnp_random_connected_graph(n, p):
     return G
 
 def GenerateGraphData(n):
-    label_list=[]
 
+    probListMin=[
+        0.00156, 
+        0.00117,
+        0.00092 ,
+        0.00055,
+        0.00055,
+        0.00062,
+        0.00050
+    ]
+    probListMax=[
+        0.00234, 
+        0.00146, 
+        0.00110, 
+        0.00110,
+        0.00082,
+        0.00067,
+        0.00067
+    ]
+
+    label_list=[]
     Graph_list=[]
-    
-    for i in range(n):
-        G=gnp_random_connected_graph(random.randint(5,2500)*2,random.uniform(0,0.0015))
-        trueCount=0
-        print("on graph: ",i,end="\r")
-        for i in range(1):
-            Partition=community.kernighan_lin.kernighan_lin_bisection(G,max_iter=2000)
+
+    for k in range(1,8):
+        for i in range(n):
+            nodeCount=random.randint(150*k,150*(k+1))*2
+            G=gnp_random_connected_graph(nodeCount,random.uniform(probListMin[k-1],probListMax[k-1]))
+            Partition=community.kernighan_lin.kernighan_lin_bisection(G,max_iter=int( (0.4*len(G.nodes())*math.log10(len(G.nodes())))) )
             Gs1=nx.subgraph(G,Partition[0])
             Gs2=nx.subgraph(G,Partition[1])
-            if(nx.is_connected(Gs1) and nx.is_connected(Gs2) and len(Gs1.nodes())==len(Gs2.nodes())):
-                trueCount+=1
-                break
-        if(trueCount>0):
-            label_list=[True]+label_list
-            Graph_list=[G]+Graph_list
-        else:
-            label_list=label_list+[False]
-            Graph_list=Graph_list+[G]
+            if(nx.is_connected(Gs1) and nx.is_connected(Gs2) and len(Gs1.nodes()) <= (len(G.nodes())/2+len(G.nodes())*0.01) 
+                    and len(Gs1.nodes()) >= (len(G.nodes())/2-len(G.nodes())*0.01)   ):
+                label_list=[True]+label_list
+                Graph_list=[G]+Graph_list
+            else:
+                label_list=label_list+[False]
+                Graph_list=Graph_list+[G]
         
     graph_data= {
         "Graph": Graph_list,
@@ -65,8 +82,8 @@ if __name__== '__main__':
     abs_file_path = os.path.join(script_dir, rel_path)
 
 
-    p=multiprocessing.Pool(16)
-    GraphDataList=p.map(GenerateGraphData,[150]*16)
+    p=multiprocessing.Pool(4)
+    GraphDataList=p.map(GenerateGraphData,[100]*4)
 
     midPointDf= pd.DataFrame(GraphDataList)
     Glist=[]

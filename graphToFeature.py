@@ -62,7 +62,7 @@ print("Completed Graph2Vec")
 
 # plt.show()
 
-knn = KNeighborsClassifier(n_neighbors=25)
+knn = KNeighborsClassifier(n_neighbors=50)
 
 
 X_train, X_test, y_train, y_test =train_test_split(G2VEmbedding,Graph_df['Labels'],test_size=0.2)
