@@ -1,8 +1,9 @@
+import math
 import os
 import networkx as nx
 # from itertools import combinations, groupby
-# import random
-# from networkx.algorithms import community
+import random
+from networkx.algorithms import community
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle
@@ -80,7 +81,39 @@ print(f1_score(y_test, y_pred, average=None))
 ConfusionMatrixDisplay.from_estimator(knn, X_test, y_test)
 plt.show()
 
+
+
+label_list=[]
+Graph_list=[]
+for k in range(1,8):
+    for i in range(50):
+        nodeCount=random.randint(150*k,150*(k+1))*2
+        G=nx.barabasi_albert_graph(random.randint(200,300),random.randint(1,10))
+        Partition=community.kernighan_lin.kernighan_lin_bisection(G,max_iter=int( (0.4*len(G.nodes())*math.log10(len(G.nodes())))) )
+        Gs1=nx.subgraph(G,Partition[0])
+        Gs2=nx.subgraph(G,Partition[1])
+        if(nx.is_connected(Gs1) and nx.is_connected(Gs2) and len(Gs1.nodes()) <= (len(G.nodes())/2+len(G.nodes())*0.01) 
+                and len(Gs1.nodes()) >= (len(G.nodes())/2-len(G.nodes())*0.01)   ):
+                label_list=[True]+label_list
+                Graph_list=[G]+Graph_list
+        else:
+                label_list=label_list+[False]
+                Graph_list=Graph_list+[G]
+
+
+y_pred=knn.predict(Graph_list)
+accuracy = accuracy_score(label_list, y_pred)
+print("Accuracy:", accuracy)
+
+print(f1_score(label_list, y_pred, average=None))
+ConfusionMatrixDisplay.from_estimator(knn, Graph_list, label_list)
+
 exit()
+
+
+
+
+
 ###################
 
 rel_path = "GraphDatas/GraphdataSmall.pickle"
